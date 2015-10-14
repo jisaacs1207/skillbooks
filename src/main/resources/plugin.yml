@@ -1,0 +1,12 @@
+name: SkillBooks
+main: io.github.jisaacs1207.skillbooks.SkillBooks
+version: 1.0
+author: jisaacs1207
+website: http://fivekingdoms.net
+description: >
+             Learn skills through reading. How fun?!
+
+commands:
+   skillbooks:
+      description: Learn skills the old fashioned way. 
+      aliases: sb
