@@ -27,7 +27,7 @@ public class SkillsCrafting implements Listener{
 	
 // Alchemy (Requires Crafting) Can create potions without a bench from a list, chance of learning new potions.
 	
-// Philosphers Stone (Requires Advanced Alchemy and Dendrology) Can exchange materials for other materials.
+// Transmutation (Requires Advanced Alchemy and Dendrology) Can exchange materials for other materials.
 
 // Bowcrafting (Requires Crafting, Dendrology, and Bow Lore) Can create specialty bows based on skill level and secondary skills, and dendrology skills.
 	
@@ -39,9 +39,24 @@ public class SkillsCrafting implements Listener{
 	
 // Tinkering (Requires Deconstruct) Can turn devices in to other random and more interesting devises.
 	
+// Amateur Writing (Requires Crafting) Can write a random L1 book every 12h.
+	
+// Original Writing (Requires Crafting) Can write a random enchant book every 6h.
+	
+// Authorship (Requires Original Writing and Advanced Writing) Can write any enchantment or skill book (even L5) once every 72h. 
+	
+// 
+	
 /*     
  * Secondary Skills
  */
+	
+// Beginner Writing (Requires Amateur Writing) Can write a random L2 book every 24h.
+	
+// Intermediary Writing (Requires Beginner Writing) Can write a random L3 book every 48h.
+	
+// Advanced Writing (Required Intermediary Writing) Can write a random L4 book every 72h.
+	
 // Mounting (Requires Taming) /mount mounts a tamed creature /dismount dismounts a tamed creature
 	
 // Creature Commands (Requires Creature Control) Tamed pet will attack target painted with a pet attractant potion. 
@@ -62,7 +77,7 @@ public class SkillsCrafting implements Listener{
 
 // Advanced Bowcrafting (Requires Improved Bowcrafting) Can create additional bows
 
-// Deconstruct (Requires Engineering) Can deconstruct any device, weapon, or armor, for the basic materials.
+// Deconstruct (Requires Engineering) Can deconstruct any device, weapon, or armor, for basic materials.
 	
 }
 
