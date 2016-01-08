@@ -1,8 +1,8 @@
 package io.github.jisaacs1207.skillbooks;
 
 import java.io.File;
+import java.util.HashMap;
 import org.bukkit.Bukkit;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -11,10 +11,12 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public final class SkillBooks extends JavaPlugin implements Listener{
 	public static SkillBooks plugin;
+	public static HashMap<String, PlayerConfig> playerStats = new HashMap<String, PlayerConfig>();
 	
 	@Override
 	public void onEnable() {
 		plugin = this;
+		
 		getServer().getPluginManager().registerEvents(this, this);
 		saveConfig();
 		registerEvents(this, new SkillsMovement(), new Commands(), new SkillsWeapons(), new SkillsDefense(), 
@@ -44,12 +46,20 @@ public final class SkillBooks extends JavaPlugin implements Listener{
 		String player = event.getPlayer().getName();
 		//Create a reference to (playername).yml
 		File playerfile = new File(getDataFolder()+"/players/"+player);
-		YamlConfiguration playerfileyaml = YamlConfiguration.loadConfiguration(playerfile);
+		//YamlConfiguration playerfileyaml = YamlConfiguration.loadConfiguration(playerfile);
 		//Check if file exists in the referenced location
 		if(!playerfile.exists())
 		{	
 			// profile creation 
 			Methods.generateNewPlayerFile(player);			
 		}
+		
+		Methods.populateMapFromPFile(player);
+		PlayerConfig test = new PlayerConfig();
+		test = playerStats.get(player);
+		int vipL = test.viplevel;
+		int elemental = test.elemental;
+		getServer().broadcastMessage(Integer.toString(vipL));
+		getServer().broadcastMessage(Integer.toString(elemental));
 	}
 }
