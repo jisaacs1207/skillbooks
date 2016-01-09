@@ -2,11 +2,23 @@ package io.github.jisaacs1207.skillbooks;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
+
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 
 public class Methods implements Listener{
-
+	
+	public static boolean isInt(String s){
+	    try {
+	        Integer.parseInt(s);
+	    } catch (NumberFormatException nfe) {
+	        return false;
+	    }
+	    return true;	
+	}
+	
 	public static int getSkillPoints(String playerName) {
 		File playerfile = new File(SkillBooks.plugin.getDataFolder()+"/players/"+playerName);
 		YamlConfiguration playerfileyaml = YamlConfiguration.loadConfiguration(playerfile);
@@ -16,6 +28,218 @@ public class Methods implements Listener{
 			skillPoints = keyValue+skillPoints;
 		}
 		return skillPoints;
+	}
+	
+	public static void setSkillLevel(Player sender, String playerName, String skill, String level){
+		
+		// Pretty sloppy coding here, but functions. I'll get back to prettifying it later.
+		
+		PlayerConfig pConfig = new PlayerConfig();
+		pConfig = SkillBooks.playerStats.get(playerName);
+		boolean worked = false;
+		boolean levelIsInt = true;
+		boolean skillFound = false;
+		boolean playerFound=false;
+		int skillLevel = 50;
+		
+		//Checks if playerfile is in the files.
+		File folder = new File(SkillBooks.plugin.getDataFolder()+"/players/");
+		File[] listOfFiles = folder.listFiles();
+		for(File file : listOfFiles){
+	    	String fileName= file.getName().toString();
+	    	if(playerName.equalsIgnoreCase(fileName)){
+	    		playerFound=true;
+	    	}
+		}
+		
+		// Ensures a catch if level is not a number or if it doesn't fall in to 0-100
+		if(Methods.isInt(level)){
+			skillLevel = Integer.valueOf(level);
+		}
+		if((skillLevel<0)||(skillLevel>100)){
+			level="potato";
+		}
+		if(!Methods.isInt(level)){
+			levelIsInt=false;
+		}
+		// If a player is found, tries to find the skill, if it does, it writes the value to the hashmap.
+		else{
+			if(playerFound==true){
+				for(Field key: pConfig.getClass().getDeclaredFields()){
+					String name = key.getName();
+					if(name.equalsIgnoreCase(skill)){
+						key.setAccessible(true);
+						try {
+							key.set(pConfig, Integer.valueOf(level));
+							SkillBooks.playerStats.put(playerName, pConfig);
+							worked=true;
+							skillFound=true;
+							
+						} catch (IllegalArgumentException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+							SkillBooks.plugin.getServer().broadcastMessage("SB IllegalArgumentException!");
+						} catch (IllegalAccessException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+							SkillBooks.plugin.getServer().broadcastMessage("SB IllegalAccessException!");
+						}
+					}
+				}
+				
+				// The sketchy catches begin.
+				if(skillFound==false){
+					sender.sendMessage(skill + " isn't a recognized skill.");
+				}
+			}
+			else{
+				sender.sendMessage("Player not found!");
+			}
+			
+		}
+		if(worked==true){
+			sender.sendMessage("Successfully set " + playerName + "'s " + skill + " level to " + level + "!");
+			Methods.saveMapToPFile(playerName);
+		}
+		if((levelIsInt==false)&&(playerFound==true)){
+			sender.sendMessage("Skill level must be a valid integer between 0 and 100.");
+		}
+	}
+	
+	// Saves the hashmap to the player file.
+	public static void saveMapToPFile(String playerName){
+		File playerfile = new File(SkillBooks.plugin.getDataFolder()+"/players/"+playerName);
+		YamlConfiguration playerfileyaml = YamlConfiguration.loadConfiguration(playerfile);
+		PlayerConfig pConfig = new PlayerConfig();
+		pConfig = SkillBooks.playerStats.get(playerName);
+		playerfileyaml.set("vip.level", pConfig.viplevel);
+		playerfileyaml.set("vip.teacher", pConfig.vipteacher);
+		playerfileyaml.set("skillpoints.cap", pConfig.skillpointscap);
+		playerfileyaml.set("skillpoints.current", pConfig.skillpointscurrent);
+		playerfileyaml.set("reading", pConfig.reading);
+		playerfileyaml.set("readingbegan", pConfig.readingbegan);
+		playerfileyaml.set("skills.primary.crafting.crafting", pConfig.crafting);
+		playerfileyaml.set("skills.primary.crafting.taming", pConfig.taming);
+		playerfileyaml.set("skills.primary.crafting.stabling", pConfig.stabling);
+		playerfileyaml.set("skills.primary.crafting.creaturecontrol", pConfig.creaturecontrol);
+		playerfileyaml.set("skills.primary.crafting.skinning", pConfig.skinning);
+		playerfileyaml.set("skills.primary.crafting.weaponcrafting", pConfig.weaponcrafting);
+		playerfileyaml.set("skills.primary.crafting.legendaryweaponcrafting", pConfig.legendaryweaponcrafting);
+		playerfileyaml.set("skills.primary.crafting.armorcrafting", pConfig.armorcrafting);
+		playerfileyaml.set("skills.primary.crafting.legendaryarmorcrafting", pConfig.legendaryarmorcrafting);
+		playerfileyaml.set("skills.primary.crafting.alchemy", pConfig.alchemy);
+		playerfileyaml.set("skills.primary.crafting.transmutation", pConfig.transmutation);
+		playerfileyaml.set("skills.primary.crafting.bowcrafting", pConfig.bowcrafting);
+		playerfileyaml.set("skills.primary.crafting.legendarybowcrafting", pConfig.legendarybowcrafting);
+		playerfileyaml.set("skills.primary.crafting.fletching", pConfig.fletching);
+		playerfileyaml.set("skills.primary.crafting.engineering", pConfig.engineering);
+		playerfileyaml.set("skills.primary.crafting.tinkering", pConfig.tinkering);
+		playerfileyaml.set("skills.primary.crafting.amateurwriting", pConfig.amateurwriting);
+		playerfileyaml.set("skills.primary.crafting.originalwriting", pConfig.originalwriting);
+		playerfileyaml.set("skills.primary.crafting.authorship", pConfig.authorship);
+		playerfileyaml.set("skills.primary.botany.botany", pConfig.botany);
+		playerfileyaml.set("skills.primary.botany.herbalism", pConfig.herbalism);
+		playerfileyaml.set("skills.primary.botany.dendrology", pConfig.dendrology);
+		playerfileyaml.set("skills.primary.defense.defense", pConfig.defense);
+		playerfileyaml.set("skills.primary.defense.defensivestance", pConfig.defensivestance);
+		playerfileyaml.set("skills.primary.defense.shield", pConfig.shield);
+		playerfileyaml.set("skills.primary.defense.shieldwall", pConfig.shieldwall);
+		playerfileyaml.set("skills.primary.defense.twohandeddefense", pConfig.twohandeddefense);
+		playerfileyaml.set("skills.primary.defense.twohandedcleave", pConfig.twohandedcleave);
+		playerfileyaml.set("skills.primary.defense.parry", pConfig.parry);
+		playerfileyaml.set("skills.primary.defense.dodge", pConfig.dodge);
+		playerfileyaml.set("skills.primary.defense.riposte", pConfig.riposte);
+		playerfileyaml.set("skills.primary.defense.weapons", pConfig.weapons);
+		playerfileyaml.set("skills.primary.weapons.twohanded", pConfig.twohanded);
+		playerfileyaml.set("skills.primary.defense.brawling", pConfig.brawling);
+		playerfileyaml.set("skills.primary.defense.shieldfighting", pConfig.shieldfighting);
+		playerfileyaml.set("skills.primary.defense.archery", pConfig.archery);
+		playerfileyaml.set("skills.primary.defense.onehanded", pConfig.onehanded);
+		playerfileyaml.set("skills.primary.movement.movement", pConfig.movement);
+		playerfileyaml.set("skills.primary.movement.athletics", pConfig.athletics);
+		playerfileyaml.set("skills.primary.movement.riding", pConfig.riding);
+		playerfileyaml.set("skills.primary.movement.damageavoidance", pConfig.damageavoidance);
+		playerfileyaml.set("skills.primary.movement.endurance", pConfig.endurance);
+		playerfileyaml.set("skills.primary.movement.passiveregeneration", pConfig.passiveregeneration);
+		playerfileyaml.set("skills.primary.movement.balance", pConfig.balance);
+		playerfileyaml.set("skills.primary.zoology.zoology", pConfig.zoology);
+		playerfileyaml.set("skills.primary.zoology.mimicry", pConfig.mimicry);
+		playerfileyaml.set("skills.primary.zoology.disguise", pConfig.disguise);
+		playerfileyaml.set("skills.primary.zoology.animalcall", pConfig.animalcall);
+		playerfileyaml.set("skills.primary.zoology.terrestria", pConfig.terrestria);
+		playerfileyaml.set("skills.primary.zoology.etheria", pConfig.etheria);
+		playerfileyaml.set("skills.primary.zoology.spiraria", pConfig.spiraria);
+		playerfileyaml.set("skills.secondary.crafting.beginnerwriting", pConfig.beginnerwriting);
+		playerfileyaml.set("skills.secondary.crafting.intermediarywriting", pConfig.intermediarywriting);
+		playerfileyaml.set("skills.secondary.crafting.advancedwriting", pConfig.advancedwriting);
+		playerfileyaml.set("skills.secondary.crafting.mounting", pConfig.mounting);
+		playerfileyaml.set("skills.secondary.crafting.creaturecommands", pConfig.creaturecommands);
+		playerfileyaml.set("skills.secondary.crafting.improvedweaponcrafting", pConfig.improvedweaponcrafting);
+		playerfileyaml.set("skills.secondary.crafting.advancedweaponcrafting", pConfig.advancedweaponcrafting);
+		playerfileyaml.set("skills.secondary.crafting.improvedarmorcrafting", pConfig.improvedarmorcrafting);
+		playerfileyaml.set("skills.secondary.crafting.advancedarmorcrafting", pConfig.advancedarmorcrafting);
+		playerfileyaml.set("skills.secondary.crafting.improvedalchemy", pConfig.improvedalchemy);
+		playerfileyaml.set("skills.secondary.crafting.advancedalchemy", pConfig.advancedalchemy);
+		playerfileyaml.set("skills.secondary.crafting.improvedbowcrafting", pConfig.improvedbowcrafting);
+		playerfileyaml.set("skills.secondary.crafting.advancedbowcrafting", pConfig.advancedbowcrafting);
+		playerfileyaml.set("skills.secondary.crafting.deconstruct", pConfig.deconstruct);
+		playerfileyaml.set("skills.secondary.botany.mycology", pConfig.mycology);
+		playerfileyaml.set("skills.secondary.botany.redmushroom", pConfig.redmushroom);
+		playerfileyaml.set("skills.secondary.botany.brownmushroom", pConfig.brownmushroom);
+		playerfileyaml.set("skills.secondary.botany.mooshroom", pConfig.mooshroom);
+		playerfileyaml.set("skills.secondary.botany.greenery", pConfig.greenery);
+		playerfileyaml.set("skills.secondary.botany.flower", pConfig.flower);
+		playerfileyaml.set("skills.secondary.botany.vegetable", pConfig.vegetable);
+		playerfileyaml.set("skills.secondary.botany.fruit", pConfig.fruit);
+		playerfileyaml.set("skills.secondary.botany.melon", pConfig.melon);
+		playerfileyaml.set("skills.secondary.botany.oak", pConfig.oak);
+		playerfileyaml.set("skills.secondary.botany.spruce", pConfig.spruce);
+		playerfileyaml.set("skills.secondary.botany.birch", pConfig.birch);
+		playerfileyaml.set("skills.secondary.botany.jungle", pConfig.jungle);
+		playerfileyaml.set("skills.secondary.botany.acacia", pConfig.acacia);
+		playerfileyaml.set("skills.secondary.defense.shieldblock", pConfig.shieldblock);
+		playerfileyaml.set("skills.secondary.defense.shieldbash", pConfig.shieldbash);
+		playerfileyaml.set("skills.secondary.defense.twohandedblock", pConfig.twohandedblock);
+		playerfileyaml.set("skills.secondary.defense.offhandparry", pConfig.offhandparry);
+		playerfileyaml.set("skills.secondary.defense.sidestep", pConfig.sidestep);
+		playerfileyaml.set("skills.secondary.weapons.diamond", pConfig.diamond);
+		playerfileyaml.set("skills.secondary.weapons.iron", pConfig.iron);
+		playerfileyaml.set("skills.secondary.weapons.gold", pConfig.gold);
+		playerfileyaml.set("skills.secondary.weapons.stone", pConfig.stone);
+		playerfileyaml.set("skills.secondary.weapons.wood", pConfig.wood);
+		playerfileyaml.set("skills.secondary.weapons.sword", pConfig.sword);
+		playerfileyaml.set("skills.secondary.weapons.axe", pConfig.axe);
+		playerfileyaml.set("skills.secondary.weapons.hoe", pConfig.hoe);
+		playerfileyaml.set("skills.secondary.weapons.pickaxe", pConfig.pickaxe);
+		playerfileyaml.set("skills.secondary.weapons.shovel", pConfig.shovel);
+		playerfileyaml.set("skills.secondary.weapons.fists", pConfig.fists);
+		playerfileyaml.set("skills.secondary.movement.mountedspeed", pConfig.mountedspeed);
+		playerfileyaml.set("skills.secondary.movement.mountedfighting", pConfig.mountedfighting);
+		playerfileyaml.set("skills.secondary.movement.mountedarchery", pConfig.mountedarchery);
+		playerfileyaml.set("skills.secondary.movement.foodspeed", pConfig.foodspeed);
+		playerfileyaml.set("skills.secondary.movement.breathingtechniques", pConfig.breathingtechniques);
+		playerfileyaml.set("skills.secondary.movement.jumping", pConfig.jumping);
+		playerfileyaml.set("skills.secondary.movement.swimming", pConfig.swimming);
+		playerfileyaml.set("skills.secondary.movement.landingcontrol", pConfig.landingcontrol);
+		playerfileyaml.set("skills.secondary.movement.thickskin", pConfig.thickskin);
+		playerfileyaml.set("skills.secondary.movement.activeregeneration", pConfig.activeregeneration);
+		playerfileyaml.set("skills.secondary.zoology.livestock", pConfig.livestock);
+		playerfileyaml.set("skills.secondary.zoology.ocean", pConfig.ocean);
+		playerfileyaml.set("skills.secondary.zoology.arachnid", pConfig.arachnid);
+		playerfileyaml.set("skills.secondary.zoology.canine", pConfig.canine);
+		playerfileyaml.set("skills.secondary.zoology.feline", pConfig.feline);
+		playerfileyaml.set("skills.secondary.zoology.humanoid", pConfig.humanoid);
+		playerfileyaml.set("skills.secondary.zoology.undead", pConfig.undead);
+		playerfileyaml.set("skills.secondary.zoology.dragon", pConfig.dragon);
+		playerfileyaml.set("skills.secondary.zoology.construct", pConfig.construct);
+		playerfileyaml.set("skills.secondary.zoology.elemental", pConfig.elemental);
+		try{
+			playerfileyaml.save(playerfile);
+		} catch (IOException ex) {
+			ex.printStackTrace();
+		}
+		
+		
 	}
 	
 	public static void populateMapFromPFile(String playerName){
@@ -28,78 +252,78 @@ public class Methods implements Listener{
 		pConfig.vipteacher=playerfileyaml.getInt("vip.teacher");
 		pConfig.skillpointscap=playerfileyaml.getInt("skillpoints.cap");
 		pConfig.skillpointscurrent=playerfileyaml.getInt("skillpoints.current");
-		pConfig.crafting=playerfileyaml.getInt("reading");
-		pConfig.taming=playerfileyaml.getInt("readingbegan");
-		pConfig.stabling=playerfileyaml.getInt("skills.primary.crafting.crafting");
-		pConfig.creaturecontrol=playerfileyaml.getInt("skills.primary.crafting.taming");
-		pConfig.skinning=playerfileyaml.getInt("skills.primary.crafting.stabling");
-		pConfig.weaponcrafting=playerfileyaml.getInt("skills.primary.crafting.creaturecontrol");
-		pConfig.legendaryweaponcrafting=playerfileyaml.getInt("skills.primary.crafting.skinning");
-		pConfig.armorcrafting=playerfileyaml.getInt("skills.primary.crafting.weaponcrafting");
-		pConfig.legendaryarmorcrafting=playerfileyaml.getInt("skills.primary.crafting.legendaryweaponcrafting");
-		pConfig.alchemy=playerfileyaml.getInt("skills.primary.crafting.armorcrafting");
-		pConfig.transmutation=playerfileyaml.getInt("skills.primary.crafting.legendaryarmorcrafting");
-		pConfig.bowcrafting=playerfileyaml.getInt("skills.primary.crafting.alchemy");
-		pConfig.legendarybowcrafting=playerfileyaml.getInt("skills.primary.crafting.transmutation");
-		pConfig.fletching=playerfileyaml.getInt("skills.primary.crafting.bowcrafting");
-		pConfig.engineering=playerfileyaml.getInt("skills.primary.crafting.legendarybowcrafting");
-		pConfig.tinkering=playerfileyaml.getInt("skills.primary.crafting.fletching");
-		pConfig.amateurwriting=playerfileyaml.getInt("skills.primary.crafting.engineering");
-		pConfig.originalwriting=playerfileyaml.getInt("skills.primary.crafting.tinkering");
-		pConfig.authorship=playerfileyaml.getInt("skills.primary.crafting.amateurwriting");
-		pConfig.botany=playerfileyaml.getInt("skills.primary.crafting.originalwriting");
-		pConfig.herbalism=playerfileyaml.getInt("skills.primary.crafting.authorship");
-		pConfig.dendrology=playerfileyaml.getInt("skills.primary.botany.botany");
-		pConfig.defense=playerfileyaml.getInt("skills.primary.botany.herbalism");
-		pConfig.defensivestance=playerfileyaml.getInt("skills.primary.botany.dendrology");
-		pConfig.shield=playerfileyaml.getInt("skills.primary.defense.defense");
-		pConfig.shieldwall=playerfileyaml.getInt("skills.primary.defense.defensivestance");
-		pConfig.twohandeddefense=playerfileyaml.getInt("skills.primary.defense.shield");
-		pConfig.twohandedcleave=playerfileyaml.getInt("skills.primary.defense.shieldwall");
-		pConfig.parry=playerfileyaml.getInt("skills.primary.defense.twohandeddefense");
-		pConfig.dodge=playerfileyaml.getInt("skills.primary.defense.twohandedcleave");
-		pConfig.riposte=playerfileyaml.getInt("skills.primary.defense.parry");
-		pConfig.weapons=playerfileyaml.getInt("skills.primary.defense.dodge");
-		pConfig.twohanded=playerfileyaml.getInt("skills.primary.defense.riposte");
-		pConfig.brawling=playerfileyaml.getInt("skills.primary.defense.weapons");
-		pConfig.shieldfighting=playerfileyaml.getInt("skills.primary.weapons.twohanded");
-		pConfig.archery=playerfileyaml.getInt("skills.primary.defense.brawling");
-		pConfig.onehanded=playerfileyaml.getInt("skills.primary.defense.shieldfighting");
-		pConfig.movement=playerfileyaml.getInt("skills.primary.defense.archery");
-		pConfig.athletics=playerfileyaml.getInt("skills.primary.defense.onehanded");
-		pConfig.riding=playerfileyaml.getInt("skills.primary.movement.movement");
-		pConfig.damageavoidance=playerfileyaml.getInt("skills.primary.movement.athletics");
-		pConfig.endurance=playerfileyaml.getInt("skills.primary.movement.riding");
-		pConfig.passiveregeneration=playerfileyaml.getInt("skills.primary.movement.damageavoidance");
-		pConfig.balance=playerfileyaml.getInt("skills.primary.movement.endurance");
-		pConfig.zoology=playerfileyaml.getInt("skills.primary.movement.passiveregeneration");
-		pConfig.mimicry=playerfileyaml.getInt("skills.primary.movement.balance");
-		pConfig.disguise=playerfileyaml.getInt("skills.primary.zoology.zoology");
-		pConfig.animalcall=playerfileyaml.getInt("skills.primary.zoology.mimicry");
-		pConfig.terrestria=playerfileyaml.getInt("skills.primary.zoology.disguise");
-		pConfig.etheria=playerfileyaml.getInt("skills.primary.zoology.animalcall");
-		pConfig.spiraria=playerfileyaml.getInt("skills.primary.zoology.terrestria");
-		pConfig.beginnerwriting=playerfileyaml.getInt("skills.primary.zoology.etheria");
-		pConfig.intermediarywriting=playerfileyaml.getInt("skills.primary.zoology.spiraria");
-		pConfig.advancedwriting=playerfileyaml.getInt("skills.secondary.crafting.beginnerwriting");
-		pConfig.mounting=playerfileyaml.getInt("skills.secondary.crafting.intermediarywriting");
-		pConfig.creaturecommands=playerfileyaml.getInt("skills.secondary.crafting.advancedwriting");
-		pConfig.improvedweaponcrafting=playerfileyaml.getInt("skills.secondary.crafting.mounting");
-		pConfig.advancedweaponcrafting=playerfileyaml.getInt("skills.secondary.crafting.creaturecommands");
-		pConfig.improvedarmorcrafting=playerfileyaml.getInt("skills.secondary.crafting.improvedweaponcrafting");
-		pConfig.advancedarmorcrafting=playerfileyaml.getInt("skills.secondary.crafting.advancedweaponcrafting");
-		pConfig.improvedalchemy=playerfileyaml.getInt("skills.secondary.crafting.improvedarmorcrafting");
-		pConfig.advancedalchemy=playerfileyaml.getInt("skills.secondary.crafting.advancedarmorcrafting");
-		pConfig.improvedbowcrafting=playerfileyaml.getInt("skills.secondary.crafting.improvedalchemy");
-		pConfig.advancedbowcrafting=playerfileyaml.getInt("skills.secondary.crafting.advancedalchemy");
-		pConfig.deconstruct=playerfileyaml.getInt("skills.secondary.crafting.improvedbowcrafting");
-		pConfig.mycology=playerfileyaml.getInt("skills.secondary.crafting.advancedbowcrafting");
-		pConfig.redmushroom=playerfileyaml.getInt("skills.secondary.crafting.deconstruct");
-		pConfig.brownmushroom=playerfileyaml.getInt("skills.secondary.botany.mycology");
-		pConfig.mooshroom=playerfileyaml.getInt("skills.secondary.botany.redmushroom");
-		pConfig.greenery=playerfileyaml.getInt("skills.secondary.botany.brownmushroom");
-		pConfig.reading=playerfileyaml.getInt("skills.secondary.botany.mooshroom");
-		pConfig.readingbegan=playerfileyaml.getInt("skills.secondary.botany.greenery");
+		pConfig.reading=playerfileyaml.getInt("reading");
+		pConfig.readingbegan=playerfileyaml.getInt("readingbegan");
+		pConfig.crafting=playerfileyaml.getInt("skills.primary.crafting.crafting");
+		pConfig.taming=playerfileyaml.getInt("skills.primary.crafting.taming");
+		pConfig.stabling=playerfileyaml.getInt("skills.primary.crafting.stabling");
+		pConfig.creaturecontrol=playerfileyaml.getInt("skills.primary.crafting.creaturecontrol");
+		pConfig.skinning=playerfileyaml.getInt("skills.primary.crafting.skinning");
+		pConfig.weaponcrafting=playerfileyaml.getInt("skills.primary.crafting.weaponcrafting");
+		pConfig.legendaryweaponcrafting=playerfileyaml.getInt("skills.primary.crafting.legendaryweaponcrafting");
+		pConfig.armorcrafting=playerfileyaml.getInt("skills.primary.crafting.armorcrafting");
+		pConfig.legendaryarmorcrafting=playerfileyaml.getInt("skills.primary.crafting.legendaryarmorcrafting");
+		pConfig.alchemy=playerfileyaml.getInt("skills.primary.crafting.alchemy");
+		pConfig.transmutation=playerfileyaml.getInt("skills.primary.crafting.transmutation");
+		pConfig.bowcrafting=playerfileyaml.getInt("skills.primary.crafting.bowcrafting");
+		pConfig.legendarybowcrafting=playerfileyaml.getInt("skills.primary.crafting.legendarybowcrafting");
+		pConfig.fletching=playerfileyaml.getInt("skills.primary.crafting.fletching");
+		pConfig.engineering=playerfileyaml.getInt("skills.primary.crafting.engineering");
+		pConfig.tinkering=playerfileyaml.getInt("skills.primary.crafting.tinkering");
+		pConfig.amateurwriting=playerfileyaml.getInt("skills.primary.crafting.amateurwriting");
+		pConfig.originalwriting=playerfileyaml.getInt("skills.primary.crafting.originalwriting");
+		pConfig.authorship=playerfileyaml.getInt("skills.primary.crafting.authorship");
+		pConfig.botany=playerfileyaml.getInt("skills.primary.botany.botany");
+		pConfig.herbalism=playerfileyaml.getInt("skills.primary.botany.herbalism");
+		pConfig.dendrology=playerfileyaml.getInt("skills.primary.botany.dendrology");
+		pConfig.defense=playerfileyaml.getInt("skills.primary.defense.defense");
+		pConfig.defensivestance=playerfileyaml.getInt("skills.primary.defense.defensivestance");
+		pConfig.shield=playerfileyaml.getInt("skills.primary.defense.shield");
+		pConfig.shieldwall=playerfileyaml.getInt("skills.primary.defense.shieldwall");
+		pConfig.twohandeddefense=playerfileyaml.getInt("skills.primary.defense.twohandeddefense");
+		pConfig.twohandedcleave=playerfileyaml.getInt("skills.primary.defense.twohandedcleave");
+		pConfig.parry=playerfileyaml.getInt("skills.primary.defense.parry");
+		pConfig.dodge=playerfileyaml.getInt("skills.primary.defense.dodge");
+		pConfig.riposte=playerfileyaml.getInt("skills.primary.defense.riposte");
+		pConfig.weapons=playerfileyaml.getInt("skills.primary.defense.weapons");
+		pConfig.twohanded=playerfileyaml.getInt("skills.primary.weapons.twohanded");
+		pConfig.brawling=playerfileyaml.getInt("skills.primary.defense.brawling");
+		pConfig.shieldfighting=playerfileyaml.getInt("skills.primary.defense.shieldfighting");
+		pConfig.archery=playerfileyaml.getInt("skills.primary.defense.archery");
+		pConfig.onehanded=playerfileyaml.getInt("skills.primary.defense.onehanded");
+		pConfig.movement=playerfileyaml.getInt("skills.primary.movement.movement");
+		pConfig.athletics=playerfileyaml.getInt("skills.primary.movement.athletics");
+		pConfig.riding=playerfileyaml.getInt("skills.primary.movement.riding");
+		pConfig.damageavoidance=playerfileyaml.getInt("skills.primary.movement.damageavoidance");
+		pConfig.endurance=playerfileyaml.getInt("skills.primary.movement.endurance");
+		pConfig.passiveregeneration=playerfileyaml.getInt("skills.primary.movement.passiveregeneration");
+		pConfig.balance=playerfileyaml.getInt("skills.primary.movement.balance");
+		pConfig.zoology=playerfileyaml.getInt("skills.primary.zoology.zoology");
+		pConfig.mimicry=playerfileyaml.getInt("skills.primary.zoology.mimicry");
+		pConfig.disguise=playerfileyaml.getInt("skills.primary.zoology.disguise");
+		pConfig.animalcall=playerfileyaml.getInt("skills.primary.zoology.animalcall");
+		pConfig.terrestria=playerfileyaml.getInt("skills.primary.zoology.terrestria");
+		pConfig.etheria=playerfileyaml.getInt("skills.primary.zoology.etheria");
+		pConfig.spiraria=playerfileyaml.getInt("skills.primary.zoology.spiraria");
+		pConfig.beginnerwriting=playerfileyaml.getInt("skills.secondary.crafting.beginnerwriting");
+		pConfig.intermediarywriting=playerfileyaml.getInt("skills.secondary.crafting.intermediarywriting");
+		pConfig.advancedwriting=playerfileyaml.getInt("skills.secondary.crafting.advancedwriting");
+		pConfig.mounting=playerfileyaml.getInt("skills.secondary.crafting.mounting");
+		pConfig.creaturecommands=playerfileyaml.getInt("skills.secondary.crafting.creaturecommands");
+		pConfig.improvedweaponcrafting=playerfileyaml.getInt("skills.secondary.crafting.improvedweaponcrafting");
+		pConfig.advancedweaponcrafting=playerfileyaml.getInt("skills.secondary.crafting.advancedweaponcrafting");
+		pConfig.improvedarmorcrafting=playerfileyaml.getInt("skills.secondary.crafting.improvedarmorcrafting");
+		pConfig.advancedarmorcrafting=playerfileyaml.getInt("skills.secondary.crafting.advancedarmorcrafting");
+		pConfig.improvedalchemy=playerfileyaml.getInt("skills.secondary.crafting.improvedalchemy");
+		pConfig.advancedalchemy=playerfileyaml.getInt("skills.secondary.crafting.advancedalchemy");
+		pConfig.improvedbowcrafting=playerfileyaml.getInt("skills.secondary.crafting.improvedbowcrafting");
+		pConfig.advancedbowcrafting=playerfileyaml.getInt("skills.secondary.crafting.advancedbowcrafting");
+		pConfig.deconstruct=playerfileyaml.getInt("skills.secondary.crafting.deconstruct");
+		pConfig.mycology=playerfileyaml.getInt("skills.secondary.botany.mycology");
+		pConfig.redmushroom=playerfileyaml.getInt("skills.secondary.botany.redmushroom");
+		pConfig.brownmushroom=playerfileyaml.getInt("skills.secondary.botany.brownmushroom");
+		pConfig.mooshroom=playerfileyaml.getInt("skills.secondary.botany.mooshroom");
+		pConfig.greenery=playerfileyaml.getInt("skills.secondary.botany.greenery");
 		pConfig.flower=playerfileyaml.getInt("skills.secondary.botany.flower");
 		pConfig.vegetable=playerfileyaml.getInt("skills.secondary.botany.vegetable");
 		pConfig.fruit=playerfileyaml.getInt("skills.secondary.botany.fruit");

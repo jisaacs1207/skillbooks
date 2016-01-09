@@ -55,11 +55,5 @@ public final class SkillBooks extends JavaPlugin implements Listener{
 		}
 		
 		Methods.populateMapFromPFile(player);
-		PlayerConfig test = new PlayerConfig();
-		test = playerStats.get(player);
-		int vipL = test.viplevel;
-		int elemental = test.elemental;
-		getServer().broadcastMessage(Integer.toString(vipL));
-		getServer().broadcastMessage(Integer.toString(elemental));
 	}
 }

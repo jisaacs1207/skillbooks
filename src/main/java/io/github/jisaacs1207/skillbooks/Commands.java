@@ -39,13 +39,24 @@ public class Commands implements CommandExecutor, Listener{
 				player.sendMessage("s2");
 			}
 			
-			// admin (<empty>,inspect, teachall, wipe, teach, forget, set, setall, reload)
+			// admin (<empty>,inspect, wipe, setskill, setall, reload)
 			
 			else if (args[0].equalsIgnoreCase("admin") && args.length==1){
 				player.sendMessage("a1");
 			}
 			else if (args[0].equalsIgnoreCase("admin") && args.length==2){
 				player.sendMessage("a2");
+			}
+			else if (args[0].equalsIgnoreCase("admin") && args.length==3){
+				player.sendMessage("a3");
+			}
+			else if (args[0].equalsIgnoreCase("admin") && args.length==4){
+				player.sendMessage("a4");
+			}
+			else if (args[0].equalsIgnoreCase("admin") && args.length==5){
+				if (args[1].equalsIgnoreCase("setskill")){
+					Methods.setSkillLevel(player, args[2], args[3], (args[4]));
+				}
 			}
 			
 			// catchall
