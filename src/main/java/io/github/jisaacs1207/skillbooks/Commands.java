@@ -39,7 +39,7 @@ public class Commands implements CommandExecutor, Listener{
 				player.sendMessage("s2");
 			}
 			
-			// admin (<empty>,inspect, wipe, setskill, setall, reload)
+			// admin (<empty>,inspect, setskill, setskillall, reload)
 			
 			else if (args[0].equalsIgnoreCase("admin") && args.length==1){
 				player.sendMessage("a1");
@@ -51,11 +51,13 @@ public class Commands implements CommandExecutor, Listener{
 				player.sendMessage("a3");
 			}
 			else if (args[0].equalsIgnoreCase("admin") && args.length==4){
-				player.sendMessage("a4");
+				if (args[1].equalsIgnoreCase("setskillall")){
+					Methods.setSkillAll(player, args[2], args[3]);
+				}
 			}
 			else if (args[0].equalsIgnoreCase("admin") && args.length==5){
 				if (args[1].equalsIgnoreCase("setskill")){
-					Methods.setSkillLevel(player, args[2], args[3], (args[4]));
+					Methods.setSkillLevel(player, args[2], args[3], args[4], true);
 				}
 			}
 			

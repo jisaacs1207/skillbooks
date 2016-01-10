@@ -29,8 +29,20 @@ public class Methods implements Listener{
 		}
 		return skillPoints;
 	}
+	public static boolean playerFileExists(String playerName){
+		boolean playerExists = false;
+		File folder = new File(SkillBooks.plugin.getDataFolder()+"/players/");
+		File[] listOfFiles = folder.listFiles();
+		for(File file : listOfFiles){
+	    	String fileName= file.getName().toString();
+	    	if(playerName.equalsIgnoreCase(fileName)){
+	    		playerExists=true;
+	    	}
+		}
+		return playerExists;
+	}
 	
-	public static void setSkillLevel(Player sender, String playerName, String skill, String level){
+	public static void setSkillLevel(Player sender, String playerName, String skill, String level, Boolean notify){
 		
 		// Pretty sloppy coding here, but functions. I'll get back to prettifying it later.
 		
@@ -42,16 +54,7 @@ public class Methods implements Listener{
 		boolean playerFound=false;
 		int skillLevel = 50;
 		
-		//Checks if playerfile is in the files.
-		File folder = new File(SkillBooks.plugin.getDataFolder()+"/players/");
-		File[] listOfFiles = folder.listFiles();
-		for(File file : listOfFiles){
-	    	String fileName= file.getName().toString();
-	    	if(playerName.equalsIgnoreCase(fileName)){
-	    		playerFound=true;
-	    	}
-		}
-		
+		if(Methods.playerFileExists(playerName)==true) playerFound=true;
 		// Ensures a catch if level is not a number or if it doesn't fall in to 0-100
 		if(Methods.isInt(level)){
 			skillLevel = Integer.valueOf(level);
@@ -89,21 +92,50 @@ public class Methods implements Listener{
 				
 				// The sketchy catches begin.
 				if(skillFound==false){
-					sender.sendMessage(skill + " isn't a recognized skill.");
+					if(notify==true){
+						sender.sendMessage(skill + " isn't a recognized skill.");
+					}
 				}
 			}
 			else{
-				sender.sendMessage("Player not found!");
+				if(notify==true){
+					sender.sendMessage("Player not found!");
+				}
 			}
 			
 		}
 		if(worked==true){
-			sender.sendMessage("Successfully set " + playerName + "'s " + skill + " level to " + level + "!");
+			if(notify==true){
+				sender.sendMessage("Successfully set " + playerName + "'s " + skill + " level to " + level + "!");
+			}		
 			Methods.saveMapToPFile(playerName);
 		}
 		if((levelIsInt==false)&&(playerFound==true)){
-			sender.sendMessage("Skill level must be a valid integer between 0 and 100.");
+			if(notify==true){
+				sender.sendMessage("Skill level must be a valid integer between 0 and 100.");
+			}
 		}
+	}
+	
+	public static void setSkillAll(Player sender, String playerName, String level){
+		if(Methods.playerFileExists(playerName)){
+			if(Methods.isInt(level)){
+				if((Integer.valueOf(level)<=100)||(Integer.valueOf(level)>=0)){
+					PlayerConfig pConfig = new PlayerConfig();
+					pConfig = SkillBooks.playerStats.get(playerName);
+					for(Field key: pConfig.getClass().getDeclaredFields()){
+						String skillName = key.getName();
+						if((!skillName.equalsIgnoreCase("viplevel"))&&(!skillName.equalsIgnoreCase("vipteacher"))&&(!skillName.equalsIgnoreCase("skillpointscap"))
+								&&(!skillName.equalsIgnoreCase("skillpointscurrent"))&&(!skillName.equalsIgnoreCase("reading"))
+								&&(!skillName.equalsIgnoreCase("readingbegan"))) Methods.setSkillLevel(sender, playerName, skillName, level, false);
+					}
+					sender.sendMessage("All of " + playerName + "'s skills successfully set to " + level + ".");
+				}
+				else sender.sendMessage("Skill level must be a valid integer between 0 and 100.");
+			}
+			else sender.sendMessage("Skill level must be a valid integer!");
+		}
+		else sender.sendMessage("Player not found!");
 	}
 	
 	// Saves the hashmap to the player file.
