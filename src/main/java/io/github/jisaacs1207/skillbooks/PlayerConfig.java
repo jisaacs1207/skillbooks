@@ -3,6 +3,9 @@ package io.github.jisaacs1207.skillbooks;
 public class PlayerConfig{
 	int viplevel;
 	int vipteacher;
+	int infofirstjoined;
+	int infolastjoined;
+	int infoplaytime;
 	int skillpointscap;
 	int skillpointscurrent;
 	int crafting;

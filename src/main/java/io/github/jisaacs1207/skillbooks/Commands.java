@@ -48,11 +48,16 @@ public class Commands implements CommandExecutor, Listener{
 				player.sendMessage("a2");
 			}
 			else if (args[0].equalsIgnoreCase("admin") && args.length==3){
-				player.sendMessage("a3");
+				if (args[1].equalsIgnoreCase("inspect")){
+					Methods.inspectPlayer(player, args[2]);
+				}
 			}
 			else if (args[0].equalsIgnoreCase("admin") && args.length==4){
 				if (args[1].equalsIgnoreCase("setskillall")){
 					Methods.setSkillAll(player, args[2], args[3]);
+				}
+				else if (args[1].equalsIgnoreCase("inspect")){
+					Methods.inspectSkill(player, args[2], args[3]);
 				}
 			}
 			else if (args[0].equalsIgnoreCase("admin") && args.length==5){
