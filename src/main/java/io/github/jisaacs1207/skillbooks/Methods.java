@@ -3,6 +3,9 @@ package io.github.jisaacs1207.skillbooks;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.Map.Entry;
+import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -21,12 +24,14 @@ public class Methods implements Listener{
 	}
 	
 	public static int getSkillPoints(String playerName) {
-		File playerfile = new File(SkillBooks.plugin.getDataFolder()+"/players/"+playerName);
-		YamlConfiguration playerfileyaml = YamlConfiguration.loadConfiguration(playerfile);
 		int skillPoints = 0;
-		for(String key : playerfileyaml.getConfigurationSection("skills.primary").getKeys(true)){
-			int keyValue = playerfileyaml.getInt("skills.primary."+key);
-			skillPoints = keyValue+skillPoints;
+		if(Methods.playerFileExists(playerName)){
+			File playerfile = new File(SkillBooks.plugin.getDataFolder()+"/players/"+playerName);
+			YamlConfiguration playerfileyaml = YamlConfiguration.loadConfiguration(playerfile);	
+			for(String key : playerfileyaml.getConfigurationSection("skills.primary").getKeys(true)){
+				int keyValue = playerfileyaml.getInt("skills.primary."+key);
+				skillPoints = keyValue+skillPoints;
+			}
 		}
 		return skillPoints;
 	}
@@ -54,6 +59,58 @@ public class Methods implements Listener{
 		}
 		
 		return exists;
+	}
+	
+	public static void displayPlayerSkills(Player sender, String playerName, String pageNumber){
+		if(Methods.playerFileExists(playerName)){
+			if(Methods.isInt(pageNumber)){
+				PlayerConfig pConfig = new PlayerConfig();
+				pConfig = SkillBooks.playerStats.get(playerName);
+				int skillNumber=0;
+				int pageCount=0;
+				int pageNumberInt = Integer.valueOf(pageNumber);
+				HashMap<String, Integer> skillMap = new HashMap<String, Integer>();
+				for(Field field:pConfig.getClass().getDeclaredFields()){
+					String skillName = field.getName();
+					if((!skillName.equalsIgnoreCase("viplevel"))&&(!skillName.equalsIgnoreCase("vipteacher"))&&(!skillName.equalsIgnoreCase("skillpointscap"))
+							&&(!skillName.equalsIgnoreCase("skillpointscurrent"))&&(!skillName.equalsIgnoreCase("reading"))
+							&&(!skillName.equalsIgnoreCase("readingbegan"))&&(!skillName.equalsIgnoreCase("infofirstjoined"))
+							&&(!skillName.equalsIgnoreCase("infolastjoined"))&&(!skillName.equalsIgnoreCase("infoplaytime"))) {
+						skillNumber++;
+						field.setAccessible(true);
+						try {
+							skillMap.put(field.getName(), field.getInt(pConfig));
+						} catch (IllegalArgumentException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (IllegalAccessException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+					
+				}
+				double tempSkill = skillNumber;
+				double tempCount = tempSkill/10;
+				pageCount = (int) Math.ceil(tempCount);
+				if((pageNumberInt<=pageCount)&&(pageNumberInt>0)){
+					skillNumber=0;
+					int skillRangeMin=(pageNumberInt*10)-9;
+					int skillRangeMax=(pageNumberInt*10);
+					TreeMap<String, Integer> sortedSkillMap = new TreeMap<String, Integer>(skillMap);
+					sender.sendMessage("************************************************");
+					sender.sendMessage(playerName.toUpperCase() + " SKILLS LISTING (Page " + pageNumber + "/" + String.valueOf(pageCount) + ")");
+					sender.sendMessage("************************************************");
+					for(Entry<String, Integer> entry:sortedSkillMap.entrySet()){
+						skillNumber++;
+						if ((skillNumber>=skillRangeMin) && (skillNumber <= skillRangeMax)){
+							sender.sendMessage(entry.getKey() + ": " + entry.getValue());
+						}			
+					}
+					sender.sendMessage("View more with '/sb admin inspect player skills [pagenumber]");
+				} else sender.sendMessage("Not a valid page number.");
+			} else sender.sendMessage("Page number must be a valid integer.");
+		} else sender.sendMessage("Player not found!");
 	}
 	
 	public static void setSkillLevel(Player sender, String playerName, String skill, String level, Boolean notify){
@@ -167,12 +224,18 @@ public class Methods implements Listener{
 			int time = (int) System.currentTimeMillis();
 			int charAge = time-firstLogin;
 			int playTime = (int) TimeUnit.SECONDS.toMillis(pConfig.infoplaytime);
+			String isTeacher = "No";
+			if(pConfig.vipteacher>0) isTeacher = "Yes";
 			String charAgeString = getDurationBreakdown(charAge);
 			String playTimeString = getDurationBreakdown(playTime);
+			sender.sendMessage("***********************************");
 			sender.sendMessage(playerName + "'s Statistics");
-			sender.sendMessage("******************");
+			sender.sendMessage("***********************************");
 			sender.sendMessage("Character Age: " + charAgeString);
 			sender.sendMessage("Character Playtime: " + playTimeString);
+			sender.sendMessage("SkillPoints Used: " + Methods.getSkillPoints(playerName) + "/1200");
+			sender.sendMessage("VIP Level: " + pConfig.viplevel);
+			sender.sendMessage("Teacher: " + isTeacher);
 		} else sender.sendMessage("Player not found!");
 	}
 	
@@ -213,7 +276,7 @@ public class Methods implements Listener{
 						if((!skillName.equalsIgnoreCase("viplevel"))&&(!skillName.equalsIgnoreCase("vipteacher"))&&(!skillName.equalsIgnoreCase("skillpointscap"))
 								&&(!skillName.equalsIgnoreCase("skillpointscurrent"))&&(!skillName.equalsIgnoreCase("reading"))
 								&&(!skillName.equalsIgnoreCase("readingbegan"))&&(!skillName.equalsIgnoreCase("infofirstjoined"))
-								&&(!skillName.equalsIgnoreCase("infolastjoined"))) Methods.setSkillLevel(sender, playerName, skillName, level, false);
+								&&(!skillName.equalsIgnoreCase("infolastjoined"))&&(!skillName.equalsIgnoreCase("infoplaytime"))) Methods.setSkillLevel(sender, playerName, skillName, level, false);
 					}
 					sender.sendMessage("All of " + playerName + "'s skills successfully set to " + level + ".");
 				}
