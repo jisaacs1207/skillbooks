@@ -14,21 +14,21 @@ import org.bukkit.plugin.java.JavaPlugin;
 public final class SkillBooks extends JavaPlugin implements Listener{
 	public static SkillBooks plugin;
 	public static HashMap<String, PlayerConfig> playerStats = new HashMap<String, PlayerConfig>();
-	
+
 	@Override
 	public void onEnable() {
 		plugin = this;
-		
+
 		getServer().getPluginManager().registerEvents(this, this);
 		saveConfig();
 		registerEvents(this, new SkillsMovement(), new Commands(), new SkillsWeapons(), new SkillsDefense(), 
-				new SkillsCommands(), new SkillsZoology(), new SkillsBotany(), new SkillsMagic(), new SkillsCrafting());
+				new SkillsCommands(), new SkillsZoology(), new SkillsBotany(), new SkillsMagic(), new SkillsCrafting(),
+                new Help());
 		for(Player player:plugin.getServer().getOnlinePlayers())Methods.populateMapFromPFile(player.getName()); 
 		getCommand("skillbooks").setExecutor(new Commands());
 		getCommand("sb").setExecutor(new Commands());
 		getServer().getScheduler().scheduleSyncRepeatingTask(this, new Schedules.increasePlayTimeSecond(), 20L, 20L);
 		getServer().getScheduler().scheduleSyncRepeatingTask(this, new Schedules.saveStats(), 20L, 6000L);
-		
         
 	}
 

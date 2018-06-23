@@ -7,6 +7,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class Commands implements CommandExecutor, Listener{
 
@@ -27,10 +30,10 @@ public class Commands implements CommandExecutor, Listener{
 			
 			else if (args[0].equalsIgnoreCase("help") && args.length==1){
 				Methods.sbHelpSend(sender,"Josh","1%2%3%4%5%6%7",
-						"awesome","me",null);
+						"awesome");
 			}
 			else if (args[0].equalsIgnoreCase("help") && args.length==2){
-				player.sendMessage("h2");
+			    Methods.searchHelp(sender,args[1]);
 			}
 			
 			// skills (<empty>,pause,resume,stop,forget,lock,decrease,increase)

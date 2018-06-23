@@ -3,7 +3,9 @@ package io.github.jisaacs1207.skillbooks;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
@@ -18,13 +20,57 @@ import org.bukkit.event.Listener;
 
 public class Methods implements Listener{
 
+    // Help
+    // *********************************************************
+
+    public static void searchHelp(CommandSender sender, String keyword){
+        if(Help.helpHash.containsKey(keyword.toLowerCase())){
+            String definition = Help.helpHash.get(keyword.toLowerCase());
+            Methods.sbHelpSend(sender,keyword,definition," ");
+        }
+        else{
+            Methods.sbSend(sender,ChatColor.YELLOW+"'"+ChatColor.DARK_PURPLE+keyword+
+                    ChatColor.YELLOW+"' not found. Closest matches (if any):");
+            String aString;
+            if(keyword.length()>3) aString=keyword.substring(0,4).toLowerCase();
+            else if(keyword.length()==3) aString=keyword.substring(0,3).toLowerCase();
+            else aString = keyword.toLowerCase();
+            int results=0;
+            for ( String key : Help.helpHash.keySet() ) {
+                key = key.toLowerCase();
+                List<String> rList = new ArrayList<>();
+                if((key.contains(aString))&&(results<10)){
+                    Methods.sbSend(sender,ChatColor.LIGHT_PURPLE+key);
+                    results++;
+                    rList.add(key);
+                }
+                if((aString.length()>1)&&(key.contains(aString.substring(0,2)))&&(results<10)
+                        &&(!rList.contains(key))){
+                    Methods.sbSend(sender,ChatColor.LIGHT_PURPLE+key);
+                    results++;
+                    rList.add(key);
+                }
+                if((aString.length()>1)&&(key.contains(aString.substring(0,1)))&&(results<10)
+                        &&(!rList.contains(key))){
+                    Methods.sbSend(sender,ChatColor.LIGHT_PURPLE+key);
+                    results++;
+                    rList.add(key);
+                }
+            }
+            if(results==0){
+                Methods.sbSend(sender,ChatColor.LIGHT_PURPLE+"<none>");
+            }
+        }
+    }
+
+    // *********************************************************
 
     // Chat
     // *********************************************************
 
     public static void sbSend(CommandSender receiver, String message){
         receiver.sendMessage(ChatColor.GRAY + "[" + ChatColor.GOLD + "SB" + ChatColor.GRAY + "] " +
-                ChatColor.WHITE + message);
+                ChatColor.YELLOW + message);
     }
 
     public static void sbHelpPromptSend(CommandSender receiver, String command, String keyword){
@@ -33,8 +79,7 @@ public class Methods implements Listener{
                 + "/sb help " + keyword + ChatColor.DARK_PURPLE + "'.");
     }
 
-    public static void sbHelpSend(CommandSender receiver, String keyword, String message,String moreHelpKeyword1,
-								  String moreHelpKeyword2,String moreHelpKeyword3){
+    public static void sbHelpSend(CommandSender receiver, String keyword, String message,String moreHelpKeyword1){
         String[] messageLines= message.split("%");
         receiver.sendMessage(ChatColor.GRAY + "[" + ChatColor.GOLD + "SB" + ChatColor.GRAY + "] " +
                 ChatColor.GOLD + keyword +": " + ChatColor.YELLOW + messageLines[0]);
@@ -45,16 +90,9 @@ public class Methods implements Listener{
             }
         }
         // this is ugly
-        String moreHelpString=null;
-        if(moreHelpKeyword1!=null) moreHelpString=moreHelpKeyword1;
-		if(moreHelpKeyword2!=null) moreHelpString=moreHelpKeyword1+"/"+moreHelpKeyword2;
-		if(moreHelpKeyword3!=null) moreHelpString=moreHelpKeyword2+"/"+moreHelpKeyword2+"/"+moreHelpKeyword3;
-		if((moreHelpKeyword1!=null)&&(moreHelpKeyword2==null)) {
-			sbHelpPromptSend(receiver, keyword, moreHelpString);
-		}
-		else if((moreHelpKeyword1!=null)&&(moreHelpKeyword2!=null)){
-			sbHelpPromptSend(receiver, keyword, "["+moreHelpString+"]");
-		}
+
+        String moreHelpString=moreHelpKeyword1;
+        if(moreHelpString!=null) sbHelpPromptSend(receiver, keyword, moreHelpString);
     }
 
     // *********************************************************
