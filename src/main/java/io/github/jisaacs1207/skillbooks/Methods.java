@@ -39,13 +39,15 @@ public class Methods implements Listener{
 		boolean playerExists = false;
 		File folder = new File(SkillBooks.plugin.getDataFolder()+"/players/");
 		File[] listOfFiles = folder.listFiles();
-		for(File file : listOfFiles){
-	    	String fileName= file.getName().toString();
-	    	if(playerName.equalsIgnoreCase(fileName)){
-	    		playerExists=true;
-	    	}
-		}
-		return playerExists;
+        if (listOfFiles != null) {
+            for(File file : listOfFiles){
+                String fileName= file.getName().toString();
+                if(playerName.equalsIgnoreCase(fileName)){
+                    playerExists=true;
+                }
+            }
+        }
+        return playerExists;
 	}
 	
 	public static boolean skillExists(String testPlayer, String skill){
