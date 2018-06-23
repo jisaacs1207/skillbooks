@@ -8,12 +8,57 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 
+import org.bukkit.ChatColor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 
+// in the process of messing with help messages
+
 public class Methods implements Listener{
-	
+
+
+    // Chat
+    // *********************************************************
+
+    public static void sbSend(CommandSender receiver, String message){
+        receiver.sendMessage(ChatColor.GRAY + "[" + ChatColor.GOLD + "SB" + ChatColor.GRAY + "] " +
+                ChatColor.WHITE + message);
+    }
+
+    public static void sbHelpPromptSend(CommandSender receiver, String command, String keyword){
+        receiver.sendMessage(ChatColor.GRAY + "[" + ChatColor.GOLD + "SB" + ChatColor.GRAY + "] " +
+                ChatColor.DARK_PURPLE + "For more help on " + command +" type '" + ChatColor.LIGHT_PURPLE
+                + "/sb help " + keyword + ChatColor.DARK_PURPLE + "'.");
+    }
+
+    public static void sbHelpSend(CommandSender receiver, String keyword, String message,String moreHelpKeyword1,
+								  String moreHelpKeyword2,String moreHelpKeyword3){
+        String[] messageLines= message.split("%");
+        receiver.sendMessage(ChatColor.GRAY + "[" + ChatColor.GOLD + "SB" + ChatColor.GRAY + "] " +
+                ChatColor.GOLD + keyword +": " + ChatColor.YELLOW + messageLines[0]);
+        if(messageLines.length>1){
+            for(int x=1;x<messageLines.length;x++){
+                receiver.sendMessage(ChatColor.GRAY + "[" + ChatColor.GOLD + "SB" + ChatColor.GRAY + "] " +
+                        ChatColor.YELLOW + messageLines[x]);
+            }
+        }
+        // this is ugly
+        String moreHelpString=null;
+        if(moreHelpKeyword1!=null) moreHelpString=moreHelpKeyword1;
+		if(moreHelpKeyword2!=null) moreHelpString=moreHelpKeyword1+"/"+moreHelpKeyword2;
+		if(moreHelpKeyword3!=null) moreHelpString=moreHelpKeyword2+"/"+moreHelpKeyword2+"/"+moreHelpKeyword3;
+		if((moreHelpKeyword1!=null)&&(moreHelpKeyword2==null)) {
+			sbHelpPromptSend(receiver, keyword, moreHelpString);
+		}
+		else if((moreHelpKeyword1!=null)&&(moreHelpKeyword2!=null)){
+			sbHelpPromptSend(receiver, keyword, "["+moreHelpString+"]");
+		}
+    }
+
+    // *********************************************************
+
 	public static boolean isInt(String s){
 	    try {
 	        Integer.parseInt(s);
@@ -25,6 +70,7 @@ public class Methods implements Listener{
 	
 	public static int getSkillPoints(String playerName) {
 		int skillPoints = 0;
+
 		if(Methods.playerFileExists(playerName)){
 			File playerfile = new File(SkillBooks.plugin.getDataFolder()+"/players/"+playerName);
 			YamlConfiguration playerfileyaml = YamlConfiguration.loadConfiguration(playerfile);	

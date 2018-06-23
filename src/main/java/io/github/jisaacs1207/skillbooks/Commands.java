@@ -7,6 +7,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 
+
 public class Commands implements CommandExecutor, Listener{
 
 	@Override
@@ -18,13 +19,15 @@ public class Commands implements CommandExecutor, Listener{
 			// no args
 			//
 			if (args.length==0){
-				player.sendMessage("Chickenpotpie");
+                Methods.sbSend(sender,"Skillbooks v1.0");
+                Methods.sbHelpPromptSend(sender,"this plugin","skillbooks");
 			}
 			
 			// help (<empty>,<all skills>,<all skills commands>,<all admin commands> )
 			
 			else if (args[0].equalsIgnoreCase("help") && args.length==1){
-				player.sendMessage("h1");
+				Methods.sbHelpSend(sender,"Josh","1%2%3%4%5%6%7",
+						"awesome","me",null);
 			}
 			else if (args[0].equalsIgnoreCase("help") && args.length==2){
 				player.sendMessage("h2");
