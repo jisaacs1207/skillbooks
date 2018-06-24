@@ -25,8 +25,13 @@ public class Methods implements Listener{
 
     public static void searchHelp(CommandSender sender, String keyword){
         if(Help.helpHash.containsKey(keyword.toLowerCase())){
-            String definition = Help.helpHash.get(keyword.toLowerCase());
-            Methods.sbHelpSend(sender,keyword,definition," ");
+            String firstChars = Help.helpHash.get(keyword.toLowerCase()).substring(0,3);
+            if((!firstChars.equals("[A]"))||(sender.hasPermission("skillsbooks.admin"))){
+                String definition = Help.helpHash.get(keyword.toLowerCase());
+                Methods.sbHelpSend(sender,keyword,definition,null);
+            }
+            else Methods.sbSend(sender,"This helpfile is restricted to staff");
+
         }
         else{
             Methods.sbSend(sender,ChatColor.YELLOW+"'"+ChatColor.DARK_PURPLE+keyword+
@@ -86,7 +91,7 @@ public class Methods implements Listener{
         if(messageLines.length>1){
             for(int x=1;x<messageLines.length;x++){
                 receiver.sendMessage(ChatColor.GRAY + "[" + ChatColor.GOLD + "SB" + ChatColor.GRAY + "] " +
-                        ChatColor.YELLOW + messageLines[x]);
+                        ChatColor.YELLOW + "      "+ messageLines[x]);
             }
         }
         // this is ugly

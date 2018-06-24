@@ -11,6 +11,8 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
+// perms : skillbooks.admin - admin stuff
+
 public final class SkillBooks extends JavaPlugin implements Listener{
 	public static SkillBooks plugin;
 	public static HashMap<String, PlayerConfig> playerStats = new HashMap<String, PlayerConfig>();

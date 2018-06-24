@@ -29,8 +29,7 @@ public class Commands implements CommandExecutor, Listener{
 			// help (<empty>,<all skills>,<all skills commands>,<all admin commands> )
 			
 			else if (args[0].equalsIgnoreCase("help") && args.length==1){
-				Methods.sbHelpSend(sender,"Josh","1%2%3%4%5%6%7",
-						"awesome");
+				Methods.searchHelp(sender,"skillbooks");
 			}
 			else if (args[0].equalsIgnoreCase("help") && args.length==2){
 			    Methods.searchHelp(sender,args[1]);

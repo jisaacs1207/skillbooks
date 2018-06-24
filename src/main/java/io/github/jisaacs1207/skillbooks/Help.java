@@ -17,5 +17,11 @@ public class Help implements Listener {
                 "offline and online. Offline learning%" +
                 "allows those that cannot play often an%" +
                 "even chance against those who can.");
+
+        helpHash.put("admin", "[A] Admin commands are restricted to staff and%" +
+                "provide methods to help provide solutions%" +
+                "to common problems in gameplay. Staff are%" +
+                "not to abuse the commands.");
+
     }
 }
